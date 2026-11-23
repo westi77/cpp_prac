@@ -40,7 +40,7 @@ public:
         delete[] data;
     }
 
-    int getSize() {
+    int getSize() const {
         return size;
     }
 
@@ -52,7 +52,7 @@ public:
         data[index] = value;
     }
 
-    T get(int index){
+    T get(int index) const {
         if (index <0 || index>= size) {
             throw std::out_of_range("Индекс выходит за границы массива");
         }
@@ -91,7 +91,7 @@ public:
         }
     }
 
-    double distance(DynamicArray& other) {
+    double distance(const DynamicArray& other) const {
         if constexpr (std::is_arithmetic_v<T>) {
             if (size != other.size) {
                 throw std::invalid_argument("Размеры массивов должны быть одинаковыми");
@@ -106,10 +106,81 @@ public:
             throw std::bad_typeid();
         }
     }
+
+    // часть 4
+    T& operator[](int index){
+        if (index <0 ||index >=size) {
+            throw std::out_of_range("Индекс выходит за границы массива");
+        }
+        return data[index];
+    }
+
+    const T& operator[](int index) const {
+        if (index <0 ||index >=size) {
+            throw std::out_of_range("Индекс выходит за границы массива");
+        }
+        return data[index];
+    }
+
+    bool operator==(const DynamicArray& other) const {
+        if (size !=other.size) {
+            return false;
+        }
+        for (int i =0; i<size; i++) {
+            if (data[i] !=other.data[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const DynamicArray& other) const {
+        return !(*this == other);
+    }
+
+    DynamicArray& operator+=(const DynamicArray& other){
+        add(other);
+        return *this;
+    }
+
+    DynamicArray& operator-=(const DynamicArray& other){
+        sub(other);
+        return *this;
+    }
+
+    DynamicArray& operator+=(T number) {
+        for (int i = 0; i < size; i++) {
+            data[i] =data[i] + number;
+        }
+        return *this;
+    }
+
+    DynamicArray& operator-=(T number) {
+        for (int i = 0; i < size; i++) {
+            data[i] =data[i] - number;
+        }
+        return *this;
+    }
+
+    T* begin(){
+        return data;
+    }
+
+    T* end(){
+        return data + size;
+    }
+
+    const T* begin() const {
+        return data;
+    }
+
+    const T* end() const {
+        return data + size;
+    }
 };
 
 template <typename T>
-std::ostream& operator<<(std::ostream& out, DynamicArray<T>& array){
+std::ostream& operator<<(std::ostream& out, const DynamicArray<T>& array){
     out << "[";
     for (int i=0; i <array.getSize();i++){
         out << array.get(i);

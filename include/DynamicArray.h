@@ -1,18 +1,21 @@
+
 #pragma once
 #include <iostream>
-#include <stdexcept>     
-#include <typeinfo>      
-#include <type_traits>   
-#include <cmath>        
+#include <stdexcept>
+#include <typeinfo>
+#include <type_traits>
+#include <cmath>
+
 
 template <typename T>
 class DynamicArray {
 private:
     T* data;
     int size;
+
     void checkValue(T value) {
         if constexpr (std::is_integral_v<T>) {
-            long long number =value;      
+            long long number =value;
             if (number < -100||number >100) {
                 throw std::invalid_argument("Значение не входит в промежуток от -100 до 100");
             }
@@ -24,11 +27,12 @@ public:
         size =arraySize;
         data =new T[size];
         for (int i =0; i <size;i++){
-            data[i] = T();             
+            data[i] = T();
         }
     }
 
     DynamicArray(const DynamicArray& other){
+        std::cout << "  [копирование: выделяем новую память и копируем " << other.size << " элементов]" << std::endl;
         size =other.size;
         data =new T[size];
         for (int i =0; i<size; i++) {
@@ -38,6 +42,49 @@ public:
 
     ~DynamicArray() {
         delete[] data;
+    }
+
+    // Задание 1
+    DynamicArray& operator=(const DynamicArray& other) {
+        std::cout << "  [присваивание с копированием]" << std::endl;
+        if (this == &other) {
+            return *this;
+        }
+        T* newData =new T[other.size];
+        for (int i =0; i <other.size; i++) {
+            newData[i] =other.data[i];
+        }
+        delete[] data;
+        data = newData;
+        size =other.size;
+        return *this;
+    }
+
+    // Задание 2
+    DynamicArray(DynamicArray&& other) noexcept {
+        std::cout << "  [перенос: забираем указатель, ничего не копируем]" << std::endl;
+        data =other.data;
+        size =other.size;
+        other.data =nullptr;
+        other.size =0;
+    }
+
+    // Задание 3: оператор присваивания с переносом
+    DynamicArray& operator=(DynamicArray&& other) noexcept {
+        std::cout << "  [присваивание с переносом]" << std::endl;
+        if (this == &other) {
+            return *this;
+        }
+        delete[] data;
+        data =other.data;
+        size =other.size;
+        other.data =nullptr;
+        other.size =0;
+        return *this;
+    }
+
+    const void* address() const {
+        return data;
     }
 
     int getSize() const {
@@ -107,7 +154,6 @@ public:
         }
     }
 
-    // часть 4
     T& operator[](int index){
         if (index <0 ||index >=size) {
             throw std::out_of_range("Индекс выходит за границы массива");
